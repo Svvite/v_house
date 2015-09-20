@@ -476,21 +476,19 @@ house.set("housesettings", function(player, args)
 
 
 
-house.set("housedelete", function(player, args)
+house.set("housedelete", function(player)
 	{
-	//let house = AtWhichHouse(player);
-	let house = args[0];
-	if(house != false)
+	AtWhichHouse(player, function(res)
 		{
 				let connection = gm.utility.dbConnect();
           		connection.connect();
-          		let Query = "DELETE FROM houses WHERE id = " + house;
+          		let Query = "DELETE FROM houses WHERE id = " + res;
           		connection.query(Query,function(err) {
           		if(err) throw err;
           		else player.SendChatMessage("You successfully deleted the house entry from the database!");
           		});
 
-		     	HouseInfo[house] = {
+		     	HouseInfo[res] = {
           		id: -1,
           		x: -1,
           		y: -1,

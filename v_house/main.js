@@ -17,7 +17,6 @@ global.gm = {
 
 global.HouseInfo = [];
 global.CURRENT_POWER_RATE = 0.175; // 17,5% of a 1/1000 of the house price (e.g. 1.000.000$ / 1000 = 1000$ => 175$ of power costs per person)  /// Only the house-owner will pay the total of powercosts, so the 175$ have to be included in to the rent to receive profit out of the renting as a owner.
-global.ADMIN_INFO = PlayerInfo[player.name].admin
 
 function main () {
   console.log("Server started!");
