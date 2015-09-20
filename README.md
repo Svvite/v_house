@@ -78,5 +78,5 @@ owner setting: withdraw
 ##Additional Features
 **Power costs:**  
 Every house has its individual power costs: The price of a house (e.g. 1.000.000$) determines the basic power cost a owner has to pay. With every additional member of the house (renter), the owner has to pay the basic cost again. Therefore, the owner has to defray his costs through the rent price. The rate that determines the basic power cost is dynamically changeable, so the rate could change even in active server sessions.
-The current equation: 
+The current equation:  
  *(houseprice/1000) * power_rate + ((houseprice/1000) * power_rate) * amount_of_renters* 
