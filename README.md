@@ -88,5 +88,5 @@ Simply modify the original 'en' languagepack and translate every line into your 
 Make sure to share your pack with me, if you want me to add it to the standard-pack. I'd be very thankful =).  
 
 ######How to change the languagepack:    
-  Simply change the languagepack in the 'config.js' of v_house to your desired language.  
-  Note: If your package is called "fr.js", you have to change the languagepack config to: 'fr'.  
+  Simply change the languagepack in the 'config.js' of **v_house** to your desired language.  
+  Note: If your package is called *fr.js*, you have to change the languagepack config to: 'fr'.  
