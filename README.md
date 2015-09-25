@@ -79,4 +79,10 @@ owner setting: withdraw
 **Power costs:**  
 Every house has its individual power costs: The price of a house (e.g. 1.000.000$) determines the basic power cost a owner has to pay. With every additional member of the house (renter), the owner has to pay the basic cost again. Therefore, the owner has to defray his costs through the rent price. The rate that determines the basic power cost is dynamically changeable, so the rate could change even in active server sessions.
 The current equation:  
- *(houseprice/1000) * power_rate + ((houseprice/1000) * power_rate) * amount_of_renters* 
+ *(houseprice/1000) * power_rate + ((houseprice/1000) * power_rate) * amount_of_renters*  
+   
+   ##Multilingual support
+   You can change between different languagepacks to change the language of all messages users will receive.
+   If your desired language isn't in the standard pack right now, feel free to add your own languagepack:
+   Simply modify the original 'en' languagepack and translate every line into your requested language.
+   Make sure to share your pack with me, if you want me to add it to the standard-pack. I'd be very thankful =).
