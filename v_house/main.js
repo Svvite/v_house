@@ -3,6 +3,7 @@
 // v_house mysql house system by @Svvite
 // For GTA-Multiplayer (GTA V) on: http://gta-mp.net
 "use strict";
+
 global.gm = {
     config: require('./config.js'),
     events: require('./events.js'),
@@ -10,11 +11,13 @@ global.gm = {
     loadsave: require('./loadsave.js'),
     mysql: require('./node_modules/mysql')
 };
+global.languages = require('./languages/' + gm.config.languages.languagepack);
 global.HouseInfo = [];
 global.CURRENT_POWER_RATE = 0.175; // 17,5% of a 1/1000 of the house price (e.g. 1.000.000$ / 1000 = 1000$ => 175$ of power costs per person)  /// Only the house-owner will pay the total of powercosts, so the 175$ have to be included in to the rent to receive profit out of the renting as a owner.
 function main() {
     console.log("Server started!");
     gm.events.register();
+    console.log(languages.hallo);
     let testconnect = gm.utility.dbConnect();
     testconnect.connect(function(err) {
         if (err) {

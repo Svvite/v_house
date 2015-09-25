@@ -5,9 +5,11 @@
 // Please let the credits remain as a sign of respect, thank you, have fun and good luck on your GTA-MP adventure =)
 "use strict";
 let house = module.exports = new Map();
-let error_message = "You don't have the permission to use this command!";
 let hcurrentcommands = "/househelp, /housesettings, /housebuy, /housesell [-20% of purchase amount], /rent, /unrent, /housekick";
 let hadmincommands = "/housecreate, /housedelete, /housesettings"
+    /** @function househelp
+     * @desc Sends all current commands to the user. 
+     */
 house.set("househelp", function(player) {
     //if(PlayerInfo[player.name].admin > 1)
     //{
@@ -17,6 +19,9 @@ house.set("househelp", function(player) {
     //}
     //else player.SendChatMessage(hcurrentcommands);
 });
+/** @function housebuy
+ * @desc Allows the user to buy the house he'll be at. 
+ */
 house.set("housebuy", function(player) {
     if (PlayerInfo[player.name].howner.length == "" && PlayerInfo[player.name].rent.length == "") {
         AtWhichHouse(player, function(res) {
@@ -30,20 +35,23 @@ house.set("housebuy", function(player) {
                         HouseInfo[res].owner = player.name;
                         player.stats.money = player.stats.money - HouseInfo[res].price;
                         PlayerInfo[player.name].howner = HouseInfo[res].id;
-                        player.SendChatMessage("SUCCESS: You have successfully bought this house for " + HouseInfo[res].price + "$!");
-                        player.SendChatMessage("HOUSE: As a house owner, you can change all settings under the command: /housesettings");
-                        player.SendChatMessage("HOUSE: The rents of your lodgers will be deposited in the house cashbox: /cashbox");
-                        player.SendChatMessage("HOUSE: If you ever forget a house command, just look it up under the cmd: /househelp");
+                        player.SendChatMessage(languages.housebuy_success + HouseInfo[res].price + "$!");
+                        player.SendChatMessage(languages.housebuy_info1);
+                        player.SendChatMessage(languages.housebuy_info2);
+                        player.SendChatMessage(languages.housebuy_info3);
                         console.log("Player: " + player.name + " bought the house with the id: " + HouseInfo[res].id);
                         return 1;
                     });
-                } else return player.SendChatMessage("ERROR: You do not have enough money to buy this house!");
-            } else return player.SendChatMessage("ERROR: You cannot buy a house that is already been owned by someone else!");
+                } else return player.SendChatMessage(languages.housebuy_error_money);
+            } else return player.SendChatMessage(languages.housebuy_error_owned);
         });
-    } else return player.SendChatMessage("ERROR: You already own a house or rental contract of a room somewhere else!");
+    } else return player.SendChatMessage(languages.housebuy_error_already);
 });
+/** @function housesell
+ * @desc Allows the user to sell his current house. 
+ */
 house.set("housesell", function(player) {
-    if (PlayerInfo[player.name].howner.length == "") return player.SendChatMessage("ERROR: You do not own a house you can sell!");
+    if (PlayerInfo[player.name].howner.length == "") return player.SendChatMessage(languages.housesell_error_nohouse);
     else {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].owner == player.name && HouseInfo[res].id == PlayerInfo[player.name].howner) {
@@ -55,35 +63,41 @@ house.set("housesell", function(player) {
                     HouseInfo[res].owner = "Nobody";
                     player.stats.money = player.stats.money + (HouseInfo[res].price / 100) * 80;
                     PlayerInfo[player.name].howner = "";
-                    player.SendChatMessage("SUCESS: You have successfully sold your house for " + (HouseInfo[res].price / 100) * 80 + "$!");
-                    player.SendChatMessage("HOUSE: You can now buy a new house or take lodgings with someone else!");
+                    player.SendChatMessage(languages.housesell_success + (HouseInfo[res].price / 100) * 80 + "$!");
+                    player.SendChatMessage(languages.housesell_info1);
                     console.log("Player: " + player.name + " sold his house with the id: " + HouseInfo[res].id + " for the amount of: " + (HouseInfo[res].price / 100) * 80 + "$!");
                 });
-            } else return player.SendChatMessage("ERROR: You do not own this house!");
+            } else return player.SendChatMessage(languages.housesell_error_notowner);
         });
     }
 });
+/** @function rent
+ * @desc Allows an user to rent into a house, assumed the house is rentable (see: housecreate or housesettings).
+ */
 house.set("rent", function(player) {
     if (PlayerInfo[player.name].howner.length == "" && PlayerInfo[player.name].rent.length == "") {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].rentable == 1) {
-                if (HouseInfo[res].forbidden.match(player.name)) return player.SendChatMessage("ERROR: You were banned from this house, therefore you cannot rent a room again!");
+                if (HouseInfo[res].forbidden.match(player.name)) return player.SendChatMessage(languages.rent_error_banned);
                 if (player.stats.money >= HouseInfo[res].rentcost) {
                     PlayerInfo[player.name].rent = HouseInfo[res].id;
                     player.stats.money = player.stats.money - HouseInfo[res].rentcost;
                     HouseInfo[res].cashbox = HouseInfo[res].cashbox + HouseInfo[res].rentcost;
                     HouseInfo[res].renter = HouseInfo[res].renter + 1;
                     HouseInfo[res].powercost = HouseInfo[res].price * (CURRENT_POWER_RATE / 1000) + ((HouseInfo[res].price * (CURRENT_POWER_RATE / 1000)) * HouseInfo[res].renter);
-                    player.SendChatMessage("SUCESS: You have successfully rented a room in this house for " + HouseInfo[res].rentcost + "$!");
-                    player.SendChatMessage("HOUSE: You can now enter the house when ever you want.");
-                    player.SendChatMessage("HOUSE: You will pay your rent into the house cashbox with every coming payday!");
-                    player.SendChatMessage("HOUSE: You can find everything you have to now under the command: /househelp!");
+                    player.SendChatMessage(languages.rent_success + HouseInfo[res].rentcost + "$!");
+                    player.SendChatMessage(languages.rent_info1);
+                    player.SendChatMessage(languages.rent_info2);
+                    player.SendChatMessage(languages.rent_info3);
                     console.log("Player: " + player.name + " rent a room in the house with the id: " + HouseInfo[res].id + "!");
-                } else return player.SendChatMessage("ERROR: You do not carry enough money with you to rent a room at the moment!");
-            } else return player.SendChatMessage("ERROR: You can not rent a room at this house!");
+                } else return player.SendChatMessage(languages.rent_error_money);
+            } else return player.SendChatMessage(languages.rent_error_rentable);
         });
-    } else return player.SendChatMessage("ERROR: You already own a house or rented a room somewhere else!");
+    } else return player.SendChatMessage(languages.rent_error_already);
 });
+/** @function unrent
+ * @desc Allows an user to cancel his current rental contract and sets his homeless again. 
+ */
 house.set("unrent", function(player) {
     if (PlayerInfo[player.name].rent.length != "") {
         AtWhichHouse(player, function(res) {
@@ -91,16 +105,21 @@ house.set("unrent", function(player) {
                 PlayerInfo[player.name].rent = "";
                 HouseInfo[res].renter = HouseInfo[res].renter - 1;
                 HouseInfo[res].powercost = HouseInfo[res].price * (CURRENT_POWER_RATE / 1000) + ((HouseInfo[res].price * (CURRENT_POWER_RATE / 1000)) * HouseInfo[res].renter);
-                player.SendChatMessage('SUCCESS: You have successfully quit your rental contract for your room in this house!');
-                player.SendChatMessage("HOUSE: You are now able to purchase a house or rent a room somewhere else.");
+                player.SendChatMessage(languages.unrent_success);
+                player.SendChatMessage(languages.unrent_info1);
                 console.log("Player: " + player.name + " unrented his room of the house with the id: " + HouseInfo[res].id + "!");
-            } else return player.SendChatMessage("ERROR: You do not have a rental contract with this house!");
+            } else return player.SendChatMessage(languages.unrent_error_wronghouse);
         });
-    } else return player.SendChatMessage("ERROR: You do not own a rental contract of a house!");
+    } else return player.SendChatMessage(languages.unrent_error_norent);
 });
+/** @function cashbox
+ * @desc Current command to access the house cashbox. Allows the renters + owner to check the actual balance or deposit a defined value into it. The owner can withdraw a defined amount from it.
+ * @param {string} deposit/withdraw/balance - The first argument to specify the command-use.
+ * @param {integer} value - The desired value that is going to be withdrawn/deposited.
+ */
 house.set("cashbox", function(player, args) {
     if (args.length == 2) {
-        if (PlayerInfo[player.name].rent.length == "" && PlayerInfo[player.name].howner.length == "") return player.SendChatMessage("ERROR: You do not have access to this command, since you do not own a house/rent a room!");
+        if (PlayerInfo[player.name].rent.length == "" && PlayerInfo[player.name].howner.length == "") return player.SendChatMessage(languages.cashbox_withdraw_error_nohouse);
         AtWhichHouse(player, function(res) {
             if (PlayerInfo[player.name].rent == HouseInfo[res].id || player.name == HouseInfo[res].owner) {
                 if (args[0] == 'withdraw') {
@@ -109,37 +128,37 @@ house.set("cashbox", function(player, args) {
                             if (args[1] <= HouseInfo[res].cashbox) {
                                 HouseInfo[res].cashbox = HouseInfo[res].cashbox - Number(args[1]);
                                 player.stats.money = player.stats.money + Number(args[1]);
-                                player.SendChatMessage("SUCCESS: You successfully withdrawed " + args[1] + "$ out of your house cashbox! New balance: " + HouseInfo[res].cashbox + "$.");
-                            } else return player.SendChatMessage("ERROR: The amount you entered is above the current balance of your cashbox!");
-                        } else return player.SendChatMessage("ERROR: Use a valid value for your withdraw (/cashbox withdraw [$])");
-                    } else return player.SendChatMessage("ERROR: You are not the owner of this house, therefore you can not withdraw money out of the cashbox!");
+                                player.SendChatMessage(languages.cashbox_withdraw_success1 + args[1] + languages.cashbox_withdraw_success2 + HouseInfo[res].cashbox + "$.");
+                            } else return player.SendChatMessage(languages.cashbox_withdraw_error_money);
+                        } else return player.SendChatMessage(languages.cashbox_withdraw_error_valid);
+                    } else return player.SendChatMessage(languages.cashbox_withdraw_error_notowner);
                 }
                 if (args[0] == 'deposit') {
                     if (!isNaN(args[1])) {
                         if (player.stats.money >= args[1]) {
                             HouseInfo[res].cashbox = HouseInfo[res].cashbox + Number(args[1]);
                             player.stats.money -= Number(args[1]);
-                            player.SendChatMessage("SUCCESS: You successfully deposited " + args[1] + "$ into your house cashbox! New balance: " + HouseInfo[res].cashbox + "$.");
-                        } else return player.SendChatMessage("ERROR: The amount you entered is above your own money balance!");
-                    } else return player.SendChatMessage("ERROR: Use a valid value for your deposit (/cashbox deposit [$]");
+                            player.SendChatMessage(languages.cashbox_deposit_success1 + args[1] + languages.cashbox_deposit_success2 + HouseInfo[res].cashbox + "$.");
+                        } else return player.SendChatMessage(languages.cashbox_deposit_error_money);
+                    } else return player.SendChatMessage(languages.cashbox_deposit_error_valid);
                 }
             }
         });
     } else if (args.length == 1) {
-        if (args[0] == 'withdraw' || args[0] == 'deposit') return player.SendChatMessage("ERROR: Use /cashbox [deposit/withdraw/] (amount)");
-        if (PlayerInfo[player.name].rent.length == "" && PlayerInfo[player.name].howner.length == "") return player.SendChatMessage("ERROR: You do not have access to this command, since you do not own a house/rent a room!");
+        if (args[0] == 'withdraw' || args[0] == 'deposit') return player.SendChatMessage(languages.cashbox_error_dw_use);
+        if (PlayerInfo[player.name].rent.length == "" && PlayerInfo[player.name].howner.length == "") return player.SendChatMessage(languages.cashbox_error_nohouse);
         if (args[0] == 'balance') {
             AtWhichHouse(player, function(res) {
                 if (PlayerInfo[player.name].rent == HouseInfo[res].id || player.name == HouseInfo[res].owner) {
                     if (HouseInfo[res].cashbox == "") {
-                        player.SendChatMessage("HOUSE: The cashbox is currently empty!");
-                    } else player.SendChatMessage("HOUSE: The current cashbox balance is: " + HouseInfo[res].cashbox + "$!");
-                } else return player.SendChatMessage("ERROR: You are neither the owner of this house nor rent a room here!");
+                        player.SendChatMessage(languages.cashbox_balance_error_empty);
+                    } else player.SendChatMessage(languages.cashbox_balance_success + HouseInfo[res].cashbox + "$!");
+                } else return player.SendChatMessage(languages.cashbox_balance_error_notowner);
             });
         }
-    } else return player.SendChatMessage("ERROR: Use /cashbox [deposit/withdraw/balance] (amount)");
+    } else return player.SendChatMessage(languages.cashbox_error_use);
 });
-house.set("housekick", function(player, args) {
+/*house.set("housekick", function(player, args) {
     PlayerInfo[player.name].rent = PlayerInfo[player.name].howner;
     if (PlayerInfo[player.name].howner.length == "") return player.SendChatMessage("ERROR: You do not have access to this command, since you do not own a house!");
     if (args.length == 1) {
@@ -168,13 +187,19 @@ house.set("housekick", function(player, args) {
             player.SendChatMessage("HOUSE: Therefore, he won't be able to apply a rental contract again!");
         } else return player.SendChatMessage("ERROR: This player is not a lodger of your house!");
     } else return player.SendChatMessage("EROR: Use /housekick [player name or ID]");
-});
+});*/
 //				House - Setting house - House - Setting house - House - Setting house 				//
 //				House - Setting house - House - Setting house - House - Setting house 				//
 //				House - Setting house - House - Setting house - House - Setting house 				//
 //				House - Setting house - House - Setting house - House - Setting house 				//
 //				House - Setting house - House - Setting house - House - Setting house 				//
-house.set("housecreate", (player, args) => {
+/** @function housecreate
+ * @desc Allows an admin to create a new house in-game.
+ * @arg {integer} price - The initial price of what the new house should cost.
+ * @arg {boolean} rentable - Allows the admin to set the house into a rentable or non-rentable state.
+ * @arg {integer} rent cost - Determines the costs a user has to pay for his rent.
+ */
+house.set("housecreate", function(player, args) {
     //if(PlayerInfo[player.name].admin < 3)
     //{
     if (args.length > 2) {
@@ -230,6 +255,11 @@ house.set("housecreate", (player, args) => {
     //}
     //else player.SendChatMessage(error_message);*/
 });
+/** @function housesettings
+ * @desc Allows the user/admin to change the current settings of a house.
+ * @args {string} price/rentable/level/rentcost/maxrenters - The first argument to specify the command-use.
+ * @args {string} value - Represents the desired value the settings should be changed in.
+ */
 house.set("housesettings", function(player, args) {
     if (args.length < 1 || args.length > 3) {
         if (PlayerInfo[player.name].admin >= 3) {
@@ -307,10 +337,13 @@ house.set("housesettings", function(player, args) {
         else return player.SendChatMessage("ERROR: You are not the owner of this house!");
     }); // AtWhichHouse 
 });
-house.set("housedelete", function(player, args) {
+/** @function housedelete
+ * @desc Allows an admin to delete the house he is currently at.
+ */
+house.set("housedelete", function(player) {
     //let house = AtWhichHouse(player);
-    let house = args[0];
-    if (house != false) {
+    AtWhichHouse(player, function(res) {
+        let house = res[0].id;
         let connection = gm.utility.dbConnect();
         connection.connect();
         let Query = "DELETE FROM houses WHERE id = " + house;
@@ -333,9 +366,9 @@ house.set("housedelete", function(player, args) {
             renter: -1,
             forbidden: ""
         };
-    } else player.SendChatMessage("You are not in an icon of a valid house!");
+    });
 });
-
+/** Gets the highest House ID out of the mysQL database. */
 function getHighestHouseID() {
     let connection = gm.utility.dbConnect();
     connection.connect();
@@ -345,7 +378,11 @@ function getHighestHouseID() {
         } else throw err;
     });
 }
-
+/** 
+ * Returns the ID of the house the player is currently at, assumed he is near a house entrance.
+ * @returns {houseID}
+ * @requires utility.housesphere
+ */
 function AtWhichHouse(player, callback) {
     let housesphere;
     let con = gm.utility.dbConnect();
