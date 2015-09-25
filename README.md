@@ -82,7 +82,7 @@ The current equation:
  *(houseprice/1000) * power_rate + ((houseprice/1000) * power_rate) * amount_of_renters*  
   
 ##Multilingual support  
-You can change between different languagepacks to change the language of all messages users will receive.
+You can change between different languagepacks to change the language of all messages users will receive.  
 If your desired language isn't in the standard pack right now, feel free to add your own languagepack:  
 Simply modify the original *'en'* languagepack and translate every line into your requested language.  
 Make sure to share your pack with me, if you want me to add it to the standard-pack. I'd be very thankful =). 
