@@ -83,7 +83,7 @@ The current equation:
 
   
 
- ##Multilingual support
+ ##Multilingual support  
  You can change between different languagepacks to change the language of all messages users will receive.  
  If your desired language isn't in the standard pack right now, feel free to add your own languagepack:  
  Simply modify the original 'en' languagepack and translate every line into your requested language.  
