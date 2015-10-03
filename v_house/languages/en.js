@@ -48,5 +48,14 @@ cashbox_error_nohouse: "ERROR: You do not have access to this command, since you
 cashbox_error_dw_use: "ERROR: Use /cashbox [deposit/withdraw/] (amount)",
 cashbox_error_use: "ERROR: Use /cashbox [deposit/withdraw/balance] (amount)",
 
+lock_success_lock: "HOUSE: You locked the house!",
+lock_success_unlock: "HOUSE: You unlocked the house!",
+lock_error_nohouse: "ERROR: You do not have access to this command, since you do not own a house/rent a room!",
+lock_error_notowner: "ERROR: You are neither the owner of this house nor rent a room here!",
+
+home_success: "HOUSE: A route to your home got set on your minimap!",
+home_error_nohome: "ERROR: You do not have access to this command, since you do not own a house/rent a room!",
+home_error_already: "ERROR: You have already activated the GPS route to your home!",
+
 error_message: "You do not have the permission to use this command!"
 }

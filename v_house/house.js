@@ -50,11 +50,9 @@ house.set("housesell", function(player) {
  * @desc Allows an user to rent into a house, assumed the house is rentable (see: housecreate or housesettings).
  */
 house.set("rent", function(player) {
-
     if (PlayerInfo[player.name].howner.length == "" && PlayerInfo[player.name].rent.length == "") {
         AtWhichHouse(player, function(res) {
-        HouseInfo[res].rentToPlayer(res, player);
-        console.log(HouseInfo[res].id);
+            HouseInfo[res].rentToPlayer(res, player);
         });
     } else return player.SendChatMessage(languages.rent_error_already);
 });
@@ -65,7 +63,7 @@ house.set("unrent", function(player) {
     if (PlayerInfo[player.name].rent.length != "") {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].id == PlayerInfo[player.name].rent) {
-               HouseInfo[res].unrentToPlayer(res, player);
+                HouseInfo[res].unrentToPlayer(res, player);
             } else return player.SendChatMessage(languages.unrent_error_wronghouse);
         });
     } else return player.SendChatMessage(languages.unrent_error_norent);
@@ -81,10 +79,10 @@ house.set("cashbox", function(player, args) {
         AtWhichHouse(player, function(res) {
             if (PlayerInfo[player.name].rent == HouseInfo[res].id || player.name == HouseInfo[res].owner) {
                 if (args[0] == 'withdraw') {
-                    cashboxWithdraw(player, args[1]);
+                    HouseInfo[res].cashboxWithdraw(player, args[1]);
                 }
                 if (args[0] == 'deposit') {
-                    cashboxDeposit(player, args[1]);
+                    HouseInfo[res].cashboxDeposit(player, args[1]);
                 }
             }
         });
@@ -101,6 +99,30 @@ house.set("cashbox", function(player, args) {
             });
         }
     } else return player.SendChatMessage(languages.cashbox_error_use);
+});
+/** @function lock
+ * @desc Allows the player to change the state of his doorlock (lock/unlock), depending on its current state. (lock <-> unlock)
+ */
+house.set("lock", function(player) {
+    if (PlayerInfo[player.name].rent.length == "" && PlayerInfo[player.name].howner.length == "") return player.SendChatMessage(languages.lock_error_nohouse);
+    AtWhichHouse(player, function(res) {
+        if (PlayerInfo[player.name].rent == HouseInfo[res].id || player.name == HouseInfo[res].owner) {
+            HouseInfo[res].lockHouse(player);
+        } else return player.SendChatMessage(languages.lock_error_notowner);
+    });
+});
+/** @function home
+ * @desc Enables the player to set a marker (blip) at the location of his house and sets a route on the minimap to it.
+ */
+house.set("home", function(player) {
+if (PlayerInfo[player.name].rent == "" && PlayerInfo[player.name].howner == "") return player.SendChatMessage(languages.home_error_nohome);
+if (PlayerInfo[player.name].howner == "") {
+    let id = PlayerInfo[player.name].rent;
+} else if (PlayerInfo[player.name].rent == "") {
+    let id = PlayerInfo[player.name].howner;
+}
+if (HouseInfo[id].homeblip != -1) return player.SendChatMessage(languages.home_error_already);
+HouseInfo[id].homeToPlayer(player);
 });
 /*house.set("housekick", function(player, args) {
     PlayerInfo[player.name].rent = PlayerInfo[player.name].howner;
@@ -132,11 +154,11 @@ house.set("cashbox", function(player, args) {
         } else return player.SendChatMessage("ERROR: This player is not a lodger of your house!");
     } else return player.SendChatMessage("EROR: Use /housekick [player name or ID]");
 });*/
-//				House - Setting house - House - Setting house - House - Setting house 				//
-//				House - Setting house - House - Setting house - House - Setting house 				//
-//				House - Setting house - House - Setting house - House - Setting house 				//
-//				House - Setting house - House - Setting house - House - Setting house 				//
-//				House - Setting house - House - Setting house - House - Setting house 				//
+//              House - Setting house - House - Setting house - House - Setting house               //
+//              House - Setting house - House - Setting house - House - Setting house               //
+//              House - Setting house - House - Setting house - House - Setting house               //
+//              House - Setting house - House - Setting house - House - Setting house               //
+//              House - Setting house - House - Setting house - House - Setting house               //
 /** @function housecreate
  * @desc Allows an admin to create a new house in-game.
  * @arg {integer} price - The initial price of what the new house should cost.
@@ -174,7 +196,7 @@ house.set("housecreate", function(player, args) {
                     player.SendChatMessage("The house was successfully created!");
                     console.log("house creation successful!\n\n");
                     connection.query("UPDATE houses SET house_index = (house_index + 1) WHERE id = 9999");
-                    HouseInfo[houseid] = new House(houseid,coordx,coordy,coordz,price,rentboolean,rentcost,0,powercost,0,"Nobody",0,"");
+                    HouseInfo[houseid] = new House(houseid, coordx, coordy, coordz, price, rentboolean, rentcost, 0, powercost, 0, "Nobody", 0, "", true);
                 }
                 if (err2) {
                     console.log(err2);
@@ -294,12 +316,12 @@ house.set("housedelete", function(player) {
             cashbox: -1,
             owner: -1,
             renter: -1,
-            forbidden: ""
+            forbidden: "",
+            lock: -1,
+            homeblip: -1
         };
     });
 });
-
-
 /** Gets the highest House ID out of the mysQL database. */
 function getHighestHouseID() {
     let connection = gm.utility.dbConnect();

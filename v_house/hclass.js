@@ -2,7 +2,7 @@
 let hclass = module.exports;
 class House {
 
-    constructor(id, cx, cy, cz, price, rentboolean, rentcost, level, powercost, cashbox, owner, renter, forbidden) {
+    constructor(id, cx, cy, cz, price, rentboolean, rentcost, level, powercost, cashbox, owner, renter, forbidden, lockstate) {
         this.id = id;
         this.x = cx;
         this.y = cy;
@@ -16,6 +16,8 @@ class House {
         this.owner = owner;
         this.renter = renter;
         this.forbidden = forbidden;
+        this.lock = lockstate;
+        this.homeblip = -1;
     }
 
     rentToPlayer(houseid, player) {
@@ -100,6 +102,27 @@ class House {
         } else return player.SendChatMessage(languages.cashbox_deposit_error_valid);
     }
  
+    lockHouse(player)
+    {
+        if(this.lock == false) {
+        this.lock = true;
+        player.SendChatMessage(languages.lock_success_lock); }
+        else if(this.lock == true) {
+        this.lock == false;
+        player.SendChatMessage(languages.lock_success_unlock); }
+    }
+
+    homeToPlayer(player)
+    {
+    this.homeblip = new Blip(417, new Vector3f(this.x, this.y, this.z) );
+    this.homeblip.SetNameForPlayer(player, "Home");
+    this.homeblip.SetColorForPlayer(player, rgb(0, 143, 0) );
+    this.homeblip.SetBlipRouteForPlayer(true, player);
+    this.homeblip.SetBlipRouteColorForPlayer(rgb(0, 143, 0), player);
+    this.homeblip.SetBlipDisplayForPlayer(true, player);
+    this.homeblip.SetShortRangeForPlayer(player, false);
+    player.SendChatMessage(home_success);
+    }
 }
 
 
@@ -116,7 +139,7 @@ hclass.loadHouses = function() {
                     if (err) {
                         throw err;
                     } else {
-                        HouseInfo[i] = new House(results[0].id, results[0].cx, results[0].cy, results[0].cz, results[0].price, results[0].rentbool, results[0].rentcost, results[0].level, results[0].powercost, results[0].cashbox, results[0].owner, results[0].renter, results[0].forbidden);
+                        HouseInfo[i] = new House(results[0].id, results[0].cx, results[0].cy, results[0].cz, results[0].price, results[0].rentbool, results[0].rentcost, results[0].level, results[0].powercost, results[0].cashbox, results[0].owner, results[0].renter, results[0].forbidden,true);
                     }
                     console.log("House loaded (ID: " + HouseInfo[i].id + ")");
                 } else {
