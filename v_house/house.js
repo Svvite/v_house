@@ -27,21 +27,7 @@ house.set("housebuy", function(player) {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].owner == "Nobody") {
                 if (player.stats.money >= HouseInfo[res].price) {
-                    let connection = gm.utility.dbConnect();
-                    connection.connect();
-                    let query = "UPDATE houses SET owner = ? WHERE id = " + HouseInfo[res].id;
-                    connection.query(query, player.name, function(err, result) {
-                        if (err) throw err;
-                        HouseInfo[res].owner = player.name;
-                        player.stats.money = player.stats.money - HouseInfo[res].price;
-                        PlayerInfo[player.name].howner = HouseInfo[res].id;
-                        player.SendChatMessage(languages.housebuy_success + HouseInfo[res].price + "$!");
-                        player.SendChatMessage(languages.housebuy_info1);
-                        player.SendChatMessage(languages.housebuy_info2);
-                        player.SendChatMessage(languages.housebuy_info3);
-                        console.log("Player: " + player.name + " bought the house with the id: " + HouseInfo[res].id);
-                        return 1;
-                    });
+                    HouseInfo[res].buyToPlayer(player);
                 } else return player.SendChatMessage(languages.housebuy_error_money);
             } else return player.SendChatMessage(languages.housebuy_error_owned);
         });
@@ -55,18 +41,7 @@ house.set("housesell", function(player) {
     else {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].owner == player.name && HouseInfo[res].id == PlayerInfo[player.name].howner) {
-                let connection = gm.utility.dbConnect();
-                connection.connect();
-                let query = 'UPDATE houses SET owner = "Nobody" WHERE id = ' + HouseInfo[res].id;
-                connection.query(query, function(err, result) {
-                    if (err) throw err;
-                    HouseInfo[res].owner = "Nobody";
-                    player.stats.money = player.stats.money + (HouseInfo[res].price / 100) * 80;
-                    PlayerInfo[player.name].howner = "";
-                    player.SendChatMessage(languages.housesell_success + (HouseInfo[res].price / 100) * 80 + "$!");
-                    player.SendChatMessage(languages.housesell_info1);
-                    console.log("Player: " + player.name + " sold his house with the id: " + HouseInfo[res].id + " for the amount of: " + (HouseInfo[res].price / 100) * 80 + "$!");
-                });
+                HouseInfo[res].sellFromPlayer(player);
             } else return player.SendChatMessage(languages.housesell_error_notowner);
         });
     }
@@ -75,23 +50,11 @@ house.set("housesell", function(player) {
  * @desc Allows an user to rent into a house, assumed the house is rentable (see: housecreate or housesettings).
  */
 house.set("rent", function(player) {
+
     if (PlayerInfo[player.name].howner.length == "" && PlayerInfo[player.name].rent.length == "") {
         AtWhichHouse(player, function(res) {
-            if (HouseInfo[res].rentable == 1) {
-                if (HouseInfo[res].forbidden.match(player.name)) return player.SendChatMessage(languages.rent_error_banned);
-                if (player.stats.money >= HouseInfo[res].rentcost) {
-                    PlayerInfo[player.name].rent = HouseInfo[res].id;
-                    player.stats.money = player.stats.money - HouseInfo[res].rentcost;
-                    HouseInfo[res].cashbox = HouseInfo[res].cashbox + HouseInfo[res].rentcost;
-                    HouseInfo[res].renter = HouseInfo[res].renter + 1;
-                    HouseInfo[res].powercost = HouseInfo[res].price * (CURRENT_POWER_RATE / 1000) + ((HouseInfo[res].price * (CURRENT_POWER_RATE / 1000)) * HouseInfo[res].renter);
-                    player.SendChatMessage(languages.rent_success + HouseInfo[res].rentcost + "$!");
-                    player.SendChatMessage(languages.rent_info1);
-                    player.SendChatMessage(languages.rent_info2);
-                    player.SendChatMessage(languages.rent_info3);
-                    console.log("Player: " + player.name + " rent a room in the house with the id: " + HouseInfo[res].id + "!");
-                } else return player.SendChatMessage(languages.rent_error_money);
-            } else return player.SendChatMessage(languages.rent_error_rentable);
+        HouseInfo[res].rentToPlayer(res, player);
+        console.log(HouseInfo[res].id);
         });
     } else return player.SendChatMessage(languages.rent_error_already);
 });
@@ -102,12 +65,7 @@ house.set("unrent", function(player) {
     if (PlayerInfo[player.name].rent.length != "") {
         AtWhichHouse(player, function(res) {
             if (HouseInfo[res].id == PlayerInfo[player.name].rent) {
-                PlayerInfo[player.name].rent = "";
-                HouseInfo[res].renter = HouseInfo[res].renter - 1;
-                HouseInfo[res].powercost = HouseInfo[res].price * (CURRENT_POWER_RATE / 1000) + ((HouseInfo[res].price * (CURRENT_POWER_RATE / 1000)) * HouseInfo[res].renter);
-                player.SendChatMessage(languages.unrent_success);
-                player.SendChatMessage(languages.unrent_info1);
-                console.log("Player: " + player.name + " unrented his room of the house with the id: " + HouseInfo[res].id + "!");
+               HouseInfo[res].unrentToPlayer(res, player);
             } else return player.SendChatMessage(languages.unrent_error_wronghouse);
         });
     } else return player.SendChatMessage(languages.unrent_error_norent);
@@ -123,24 +81,10 @@ house.set("cashbox", function(player, args) {
         AtWhichHouse(player, function(res) {
             if (PlayerInfo[player.name].rent == HouseInfo[res].id || player.name == HouseInfo[res].owner) {
                 if (args[0] == 'withdraw') {
-                    if (player.name == HouseInfo[res].owner) {
-                        if (!isNaN(args[1])) {
-                            if (args[1] <= HouseInfo[res].cashbox) {
-                                HouseInfo[res].cashbox = HouseInfo[res].cashbox - Number(args[1]);
-                                player.stats.money = player.stats.money + Number(args[1]);
-                                player.SendChatMessage(languages.cashbox_withdraw_success1 + args[1] + languages.cashbox_withdraw_success2 + HouseInfo[res].cashbox + "$.");
-                            } else return player.SendChatMessage(languages.cashbox_withdraw_error_money);
-                        } else return player.SendChatMessage(languages.cashbox_withdraw_error_valid);
-                    } else return player.SendChatMessage(languages.cashbox_withdraw_error_notowner);
+                    cashboxWithdraw(player, args[1]);
                 }
                 if (args[0] == 'deposit') {
-                    if (!isNaN(args[1])) {
-                        if (player.stats.money >= args[1]) {
-                            HouseInfo[res].cashbox = HouseInfo[res].cashbox + Number(args[1]);
-                            player.stats.money -= Number(args[1]);
-                            player.SendChatMessage(languages.cashbox_deposit_success1 + args[1] + languages.cashbox_deposit_success2 + HouseInfo[res].cashbox + "$.");
-                        } else return player.SendChatMessage(languages.cashbox_deposit_error_money);
-                    } else return player.SendChatMessage(languages.cashbox_deposit_error_valid);
+                    cashboxDeposit(player, args[1]);
                 }
             }
         });
@@ -230,21 +174,7 @@ house.set("housecreate", function(player, args) {
                     player.SendChatMessage("The house was successfully created!");
                     console.log("house creation successful!\n\n");
                     connection.query("UPDATE houses SET house_index = (house_index + 1) WHERE id = 9999");
-                    HouseInfo[houseid] = {
-                        id: houseid,
-                        x: coordx,
-                        y: coordy,
-                        z: coordz,
-                        price: price,
-                        rentable: rentboolean,
-                        rentcost: rentcost,
-                        level: 0,
-                        powercost: powercost,
-                        cashbox: 0,
-                        owner: "Nobody",
-                        renter: 0,
-                        forbidden: ""
-                    };
+                    HouseInfo[houseid] = new House(houseid,coordx,coordy,coordz,price,rentboolean,rentcost,0,powercost,0,"Nobody",0,"");
                 }
                 if (err2) {
                     console.log(err2);
@@ -368,6 +298,8 @@ house.set("housedelete", function(player) {
         };
     });
 });
+
+
 /** Gets the highest House ID out of the mysQL database. */
 function getHighestHouseID() {
     let connection = gm.utility.dbConnect();
