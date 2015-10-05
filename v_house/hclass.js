@@ -1,8 +1,9 @@
 "use strict";
 let hclass = module.exports;
-class House {
 
-    constructor(id, cx, cy, cz, price, rentboolean, rentcost, level, powercost, cashbox, owner, renter, forbidden, lockstate) {
+hclass.House = class House {
+
+    constructor(id, cx, cy, cz, price, rentboolean, rentcost, level, powercost, cashbox, owner, renter, forbidden, lockstate, inventory) {
         this.id = id;
         this.x = cx;
         this.y = cy;
@@ -18,6 +19,12 @@ class House {
         this.forbidden = forbidden;
         this.lock = lockstate;
         this.homeblip = -1;
+
+        this.inventory = {
+        	lightarmor: inventory.lightarmor,
+        	heavyarmor: inventory.heavyarmor,
+        	tv: inventory.tv
+        };
     }
 
     rentToPlayer(houseid, player) {
@@ -117,35 +124,69 @@ class House {
     this.homeblip = new Blip(417, new Vector3f(this.x, this.y, this.z) );
     this.homeblip.SetNameForPlayer(player, "Home");
     this.homeblip.SetColorForPlayer(player, rgb(0, 143, 0) );
-    this.homeblip.SetBlipRouteForPlayer(true, player);
-    this.homeblip.SetBlipRouteColorForPlayer(rgb(0, 143, 0), player);
-    this.homeblip.SetBlipDisplayForPlayer(true, player);
+    this.homeblip.SetRouteForPlayer(player, true);
+    this.homeblip.SetRouteColorForPlayer(player, rgb(0, 143, 0));
+    this.homeblip.SetVisibleForPlayer(player, true);
     this.homeblip.SetShortRangeForPlayer(player, false);
-    player.SendChatMessage(home_success);
+    player.SendChatMessage(languages.home_success);
     }
+
+   houseshop(player, item, amount)
+    {
+   	let playerstatsmoney = 1400;
+   	if(this.inventory[item] >= gm.hshop[item].amount) return player.SendChatMessage(languages.houseshop_error_amount);
+   	if((Number(amount) + this.inventory[item]) > gm.hshop[item].amount) return player.SendChatMessage(languages.houseshop_error_notfit + (gm.hshop[item].amount - this.inventory[item]));
+   	let price = gm.hshop[item].cost * amount;
+    if(playerstatsmoney >= price) {
+    playerstatsmoney = playerstatsmoney - gm.hshop[item].cost;
+    player.SendChatMessage(languages.houseshop_success.one + gm.hshop[item].name + languages.houseshop_success.two + price + "$!");
+
+    this.inventory[item] += Number(amount);
+    console.log(this.inventory[item]);
+    } else return player.SendChatMessage(languages.houseshop_error_money);
+	}
 }
 
 
-hclass.loadHouses = function() {
+hclass.loadHouses = function() 
+	{
     let connection = gm.utility.dbConnect();
     connection.connect();
-    connection.query("SELECT MAX(id) AS id FROM houses WHERE id != 9999", function(err, houseid) {
+    connection.query("SELECT MAX(id) AS id FROM houses WHERE id != 9999", function(err, houseid) 
+    	{
         if (err) throw err;
         let max_house = houseid[0].id;
-        for (let i = 0; i < max_house + 1; i++) {
+        for (let i = 0; i < max_house + 1; i++) 
+        	{
             let Query = "SELECT * FROM houses WHERE id = ?";
-            connection.query(Query, i, function(err, results) {
+            connection.query(Query, i, function(err, results) 
+            	{
                 if (results.length) {
                     if (err) {
                         throw err;
-                    } else {
-                        HouseInfo[i] = new House(results[0].id, results[0].cx, results[0].cy, results[0].cz, results[0].price, results[0].rentbool, results[0].rentcost, results[0].level, results[0].powercost, results[0].cashbox, results[0].owner, results[0].renter, results[0].forbidden,true);
-                    }
+                    } else 
+                    	{
+                    	let invquery = "SELECT * FROM houses_inv WHERE id = ?";
+                   		 connection.query(invquery, i, function(err2, results2) 
+                   		 	{
+                    		if(err) 
+                    			{
+                    			throw err;
+                    			} 
+                    		else 
+                    			{
+                    			let inventory = results2[0];
+                        		HouseInfo[i] = new hclass.House(results[0].id, results[0].cx, results[0].cy, results[0].cz, results[0].price, results[0].rentbool, results[0].rentcost, results[0].level, results[0].powercost, results[0].cashbox, results[0].owner, results[0].renter, results[0].forbidden,true,inventory);
+                    			};
                     console.log("House loaded (ID: " + HouseInfo[i].id + ")");
-                } else {
-                    HouseInfo[i] = new House(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-                }
-            });
-        }
-    });
-}
+                    		});
+                		}
+                } 
+                else 
+                	{
+                    HouseInfo[i] = new hclass.House(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+                	}
+            	});
+        	}
+    	});
+	}

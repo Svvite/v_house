@@ -11,7 +11,8 @@ global.gm = {
     //loadsave: require('./loadsave.js'),
     house: require('./house.js'),
     mysql: require('./node_modules/mysql'),
-    hclass: require('./hclass.js')
+    hclass: require('./hclass.js'),
+    hshop: require('./hshop.js')
 };
 global.languages = require('./languages/' + gm.config.languages.languagepack);
 global.HouseInfo = [];

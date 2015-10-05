@@ -57,5 +57,18 @@ home_success: "HOUSE: A route to your home got set on your minimap!",
 home_error_nohome: "ERROR: You do not have access to this command, since you do not own a house/rent a room!",
 home_error_already: "ERROR: You have already activated the GPS route to your home!",
 
+houseshop_list: "HOUSE: Current shop items: Light Armor [400$], Heavy Armor [1050$], TV [540$]!",
+houseshop_success: {
+	one: "HOUSE: You successfully bought a ",
+	two: " for the price of " },
+houseshop_general_error_nohouse: "ERROR: You do not have access to this command, since you do not own a house!",
+houseshop_general_error_noargs: "ERROR: Use /houseshop [buy/list] (value)",
+houseshop_general_error_notitem: "ERROR: The object you entered is not an item of the shop!",
+houseshop_general_error_valid: "ERROR: Use a valid value for the amount you want to buy!",
+houseshop_error_money: "ERROR: You do not own the amount of money this item costs!",
+houseshop_error_amount: "ERROR: You already own the maximum amount of this item that is possible!",
+houseshop_error_notfit: "ERROR: The amount you intend to buy would not fit in your house inventory. Possible amount: ",
+
+
 error_message: "You do not have the permission to use this command!"
 }
