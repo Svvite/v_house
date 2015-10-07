@@ -30,6 +30,9 @@ Current commands:
 *	rent
 *	unrent
 *	cashbox
+*	lock
+*	home
+*	houseshop
   
     
 */househelp* - Lists all current commands
@@ -75,6 +78,19 @@ adminsetting: houseprice
 setting: deposit/balance
 owner setting: withdraw
 ```  
+  
+*/lock* - Changes the current state of the house door [lock/unlock]  
+  
+*/home* - Sets a blip (marker) on the players minimap at the position of his house and adds a route that leads to it.  
+  
+*/houseshop* - Opens a shop where owners can buy gadgets and items that can be stored in their house inventory.
+```
+[setting] (item) (amount)
+[item] string
+[value amount] integer
+setting: list/buy
+```  
+
 ##Additional Features
 **Power costs:**  
 Every house has its individual power costs: The price of a house (e.g. 1.000.000$) determines the basic power cost a owner has to pay. With every additional member of the house (renter), the owner has to pay the basic cost again. Therefore, the owner has to defray his costs through the rent price. The rate that determines the basic power cost is dynamically changeable, so the rate could change even in active server sessions.
