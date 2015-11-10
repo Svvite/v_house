@@ -1,4 +1,5 @@
 #modDed
+I want to thank everyone who even looked up this project. I'm very sorry to tell you that gta-mp.net was just shut down by Take-Two Interactives and probably won't come back in the future. Therefore, there is currently no intention to update this house script anymore (obviously). I hope we may be able to see some changes in the restrictions of Take-Two and all be able to play GTA:MP some day. Stay healthy, what ever you're going to do, unknown reader =)
 
 # v_house
 *v_house - mySQL House system for GTA-MP*
